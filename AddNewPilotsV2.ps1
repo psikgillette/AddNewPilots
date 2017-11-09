@@ -18,7 +18,7 @@ ForEach($User in $Users){
 
         Add-Content $logfile "Adding $FullName $(Get-Date)" 
 
-        New-ADUser -Name $FullName -Instance $Template `
+        New-ADUser -Name $FullName -Instance $TemplateUser `
             -Path "OU=Pilots,OU=Star Users,DC=star,DC=dcu" `
             -GivenName $User.First -Surname $User.Last -Initials $User.Initials `
             -StreetAddress $User.Address -City $User.City -State $User.State -PostalCode $User.Zip `
