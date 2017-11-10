@@ -1,1 +1,2 @@
-Last	First	Middle	Initials	Address	"City, State, Zip"	HomePhone	CellPhone	Email	Base	Birthdate	US Citizen	Status	City	State	Zip	Area	Template
+﻿Last,First,Middle,Initials,Address,"City, State, Zip",HomePhone,CellPhone,Email,Base,Birthdate,US Citizen,Status,City,State,Zip,Area,Template
+"Pilot","Test","User","TUP","123 Main St","Somewhere, AL 12345","555 123 4567","123 555 7890","example@domain.com","PDK","1/1/1901","USA","SIC","Somewhere"," AL","12345","South",PC12SICRemoteS
