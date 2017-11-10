@@ -5,13 +5,13 @@ Import-Module ActiveDirectory
 $errorActionPreference = "Stop"
 
 #Location of log file
-$logFile = "C:\PowerShell\AddNewPilots.log"
+$logFile = "C:\PowerShell\AddNewPilots\AddNewPilots.log"
 
 #Set variable for temporary password
 $password = "Password1"
 
 #Set location for CSV file
-$users = Import-Csv -Path "C:\PowerShell\NewPilots.csv"
+$users = Import-Csv -Path "C:\PowerShell\AddNewPilots\NewPilots.csv"
 
 #Loop that creates each user in the CSV
 ForEach($user in $users){
