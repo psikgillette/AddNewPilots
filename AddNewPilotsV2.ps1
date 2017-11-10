@@ -2,56 +2,75 @@
 Import-Module ActiveDirectory
 
 #Set Error Action to stop
-$ErrorActionPreference = "Stop"
+$errorActionPreference = "Stop"
 
 #Location of log file
-$logfile = "C:\PowerShell\AddNewPilots.log"
+$logFile = "C:\PowerShell\AddNewPilots.log"
 
 #Set variable for temporary password
-$Password = "Password1"
+$password = "Password1"
 
 #Set location for CSV file
-$Users = Import-Csv -Path "C:\PowerShell\NewPilots.csv"
+$users = Import-Csv -Path "C:\PowerShell\NewPilots.csv"
 
 #Loop that creates each user in the CSV
-ForEach($User in $Users){
+ForEach($user in $users){
     Try{
-        $FullName = $User.Last + ", " + $User.First #User's full name
-        $SAM = $User.First.Substring(0,1) + $User.Last #samAccount name
-        $UPN = $SAM + "@star.dcu" #User profile name
-        $TemplateUser = Get-ADUser -Identity $User.Template -Properties Manager, Department, Title, Company #Template account to use for new user
-        $TemplateGroups = (Get-ADUser -Identity $User.Template -Properties MemberOf).MemberOf #Template groups to use for new user
+        #Variables to be used later
+        $fullName = $user.Last + ", " + $user.First #user's full name
+        $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
+        $UPN = $SAM + "@star.dcu" #user profile name
+        $templateUser = Get-ADUser -Identity $user.Template -Properties Manager, Department, Title, Company #Template account to use for new user
+        $templateGroups = (Get-ADUser -Identity $user.Template -Properties MemberOf).MemberOf #Template groups to use for new user
+
+        #Parameters for new user command
+        $newUserParams = @{
+            Name = $fullName
+            Instance = $templateUser
+            Path = "OU=Pilots,OU=Star users,DC=star,DC=dcu"
+            GivenName = $user.First
+            Surname = $user.Last
+            Initials = $user.Initials
+            StreetAddress = $user.Address
+            City = $user.City
+            State = $user.State
+            PostalCode = $user.Zip
+            Country = "US"
+            HomePhone = $user.HomePhone
+            MobilePhone = $user.CellPhone
+            Description = "Pilot"
+            SamAccountName = $SAM
+            userPrincipalName = $UPN
+            DisplayName = $fullName
+            AccountPassword = (ConvertTo-SecureString $Password -AsPlainText -Force)
+            ChangePasswordAtLogon = $true
+            Enabled = $true
+            ErrorAction = "Stop"
+        }
 
         #Comment log file
-        Add-Content $logfile "Adding $FullName $(Get-Date)" 
+        Add-Content $logFile "Adding $fullName $(Get-Date)" 
 
-        Create a new user with the specified parameters
-        New-ADUser -Name $FullName -Instance $TemplateUser `
-            -Path "OU=Pilots,OU=Star Users,DC=star,DC=dcu" `
-            -GivenName $User.First -Surname $User.Last -Initials $User.Initials `
-            -StreetAddress $User.Address -City $User.City -State $User.State -PostalCode $User.Zip `
-            -Country US -HomePhone $User.HomePhone -MobilePhone $User.CellPhone -Description "Pilot"`
-            -SamAccountName $SAM -UserPrincipalName $UPN -DisplayName $FullName `
-            -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force) `
-            -ChangePasswordAtLogon $true -Enabled $true -ErrorAction Stop
+        #Create a new user with the specified parameters
+        New-ADUser @newUserParams
 
         #Confirms creation in log file
-        Add-Content $logfile "$FullName added to Active Directory"
+        Add-Content $logFile "$fullName added to Active Directory"
 
         #Pause to be sure user is created
         Start-Sleep -Milliseconds 550
         
         #Loop to add groups to user
-        ForEach($Group in $TemplateGroups){
+        ForEach($group in $templateGroups){
             Try {
-                Add-ADGroupMember $Group -Members $SAM
+                Add-ADGroupMember $group -Members $SAM
             }
             Catch {
-                Add-Content $logfile "Error for $FullName - $($_.Exception.Message)" -PassThru
+                Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
             }
         
         #Confirms group addition in log file
-        Add-Content $logfile "$FullName added to specified groups"    
+        Add-Content $logFile "$fullName added to specified groups"    
         }
     }
     #Catch unauthorized error
@@ -61,10 +80,10 @@ ForEach($User in $Users){
     }
     #Catch user already exists error and add to log file
     catch [System.ServiceModel.FaultException]{
-        Write-Output "User $FullName already exists." | Add-Content $logfile -PassThru
+        Write-Output "user $fullName already exists." | Add-Content $logFile -PassThru
     }
     #Catch all other errors and add to log file
     catch {
-        Add-Content $logfile "Error for $FullName - $($_.Exception.Message)" -PassThru
+        Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
     }
 }
