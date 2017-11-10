@@ -1,6 +1,6 @@
 # AddNewPilots
 This script was created to automate the creation process for new pilots. A new hire roster is sent to the helpdesk,
-usually sent by Eric Cannon. The information from that email is then copied and transposed into the Excel 
+usually sent by Director of Flight Training. The information from that email is then copied and transposed into the Excel 
 template "NewPilotTemplate".This template takes the information, breaks up address fields and selects an appropriate 
 template account based on the pilot's reporting base. Once the information is entered, it should be Saved As 
 a csv file with the name "NewPilots" in the same directory. The script can then be run, referencing the newly 
