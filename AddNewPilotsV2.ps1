@@ -16,11 +16,16 @@ $users = Import-Csv -Path "C:\PowerShell\AddNewPilots\NewPilots.csv"
 #Loop that creates each user in the CSV
 ForEach($user in $users){
     Try{
+        #Variables for each user
+        $fullName = $user.Last + ", " + $user.First #user's full name
+        $templateUser = Get-ADUser -Identity $user.Template -Properties Manager, Department, Title, Company #Template account to use for new user
+        $templateGroups = (Get-ADUser -Identity $user.Template -Properties MemberOf).MemberOf #Template groups to use for new user
+        $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
+
         #Comment log file
         Add-Content $logFile "Adding $fullName $(Get-Date)" 
 
         #Test for samAccount Name
-        $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
         if (Get-ADUser -Filter "SamAccountName -eq '$SAM'") {
             #Use middle initial
             $SAM = $user.First.Substring(0,1) + $user.Initials.Substring(1,1) + $user.Last
@@ -37,11 +42,9 @@ ForEach($user in $users){
             Add-Content $logFile "Username OK"
         }
 
-        #Variables to be used later
-        $fullName = $user.Last + ", " + $user.First #user's full name
+        #User profile name set after SAM
         $UPN = $SAM + "@star.dcu" #user profile name
-        $templateUser = Get-ADUser -Identity $user.Template -Properties Manager, Department, Title, Company #Template account to use for new user
-        $templateGroups = (Get-ADUser -Identity $user.Template -Properties MemberOf).MemberOf #Template groups to use for new user
+        
 
         #Parameters for new user command
         $newUserParams = @{
