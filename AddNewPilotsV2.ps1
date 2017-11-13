@@ -26,10 +26,10 @@ ForEach($user in $users){
             $SAM = $user.First.Substring(0,1) + $user.Initials.Substring(1,1) + $user.Last
             if (Get-ADUser -Filter "SamAccountName -eq '$SAM'") {
                 #Create requires manual intervention
-                Add-Content $logFile  "Manually create user $user.First $user.Last" -PassThru
+                Add-Content $logFile  "Manually create user $($user.First) $($user.Last)" -PassThru
             }
             else {
-                Add-Content $logFile "Using middle inital for user $user.First $user.Last" -PassThru
+                Add-Content $logFile "Using middle inital for user $($user.First) $($user.Last)" -PassThru
             }
         }
         else {
@@ -84,11 +84,10 @@ ForEach($user in $users){
             }
             Catch {
                 Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
-            }
-        
-        #Confirms group addition in log file
-        Add-Content $logFile "$fullName added to specified groups"    
+            }    
         }
+        #Confirms group addition in log file
+        Add-Content $logFile "$fullName added to specified groups"
     }
 
     #Catch unauthorized error
@@ -99,7 +98,7 @@ ForEach($user in $users){
 
     #Catch user already exists error and add to log file
     Catch [System.ServiceModel.FaultException]{
-        Write-Output "user $fullName already exists." | Add-Content $logFile -PassThru
+        Write-Output "User $fullName already exists." | Add-Content $logFile -PassThru
     }
 
     #Catch all other errors and add to log file
