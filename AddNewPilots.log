@@ -5,3 +5,23 @@ Pilot, Test added to specified groups
 Pilot, Test added to specified groups
 Pilot, Test added to specified groups
 Pilot, Test added to specified groups
+Adding  11/13/2017 12:19:39
+Using middle inital for user @{Last=Pilot; First=Test; Middle=User; Initials=TUP; Address=123 Main St; City, State, Zip=Somewhere, AL 12345; HomePhone=555 123 4567; CellPhone=123 555 7890; Email=example@domain.com; Base=PDK; Birthdate=1/1/1901; US Citizen=USA; Status=SIC; City=Somewhere; State= AL; Zip=12345; Area=South; Template=PC12SICRemoteS}.First @{Last=Pilot; First=Test; Middle=User; Initials=TUP; Address=123 Main St; City, State, Zip=Somewhere, AL 12345; HomePhone=555 123 4567; CellPhone=123 555 7890; Email=example@domain.com; Base=PDK; Birthdate=1/1/1901; US Citizen=USA; Status=SIC; City=Somewhere; State= AL; Zip=12345; Area=South; Template=PC12SICRemoteS}.Last
+user Pilot, Test already exists.
+Adding  11/13/2017 12:23:48
+Using middle inital for user Test Pilot
+User Pilot, Test already exists.
+Adding  11/13/2017 12:26:59
+Username OK
+Error for Doe, John - Cannot find an object with identity: 'PC12SICRemoteSouth' under: 'DC=star,DC=dcu'.
+Adding  11/13/2017 12:28:16
+Username OK
+Doe, John added to Active Directory
+Doe, John added to specified groups
+Doe, John added to specified groups
+Doe, John added to specified groups
+Doe, John added to specified groups
+Adding  11/13/2017 12:29:59
+Using middle inital for user James Doe
+Doe, James added to Active Directory
+Doe, James added to specified groups

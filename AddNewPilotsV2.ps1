@@ -16,12 +16,35 @@ $users = Import-Csv -Path "C:\PowerShell\AddNewPilots\NewPilots.csv"
 #Loop that creates each user in the CSV
 ForEach($user in $users){
     Try{
-        #Variables to be used later
+        #Variables for each user
         $fullName = $user.Last + ", " + $user.First #user's full name
-        $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
-        $UPN = $SAM + "@star.dcu" #user profile name
         $templateUser = Get-ADUser -Identity $user.Template -Properties Manager, Department, Title, Company #Template account to use for new user
         $templateGroups = (Get-ADUser -Identity $user.Template -Properties MemberOf).MemberOf #Template groups to use for new user
+        $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
+
+        #Comment log file
+        Add-Content $logFile "Adding $fullName $(Get-Date)" 
+
+        #Test for samAccount Name
+        if (Get-ADUser -Filter "SamAccountName -eq '$SAM'") {
+            #Use middle initial
+            $SAM = $user.First.Substring(0,1) + $user.Initials.Substring(1,1) + $user.Last
+            if (Get-ADUser -Filter "SamAccountName -eq '$SAM'") {
+                #Create requires manual intervention
+                Add-Content $logFile  "Manually create user $($user.First) $($user.Last)" -PassThru
+            }
+            else {
+                Add-Content $logFile "Using middle inital for user $($user.First) $($user.Last)" -PassThru
+            }
+        }
+        else {
+            #Use first inital last name
+            Add-Content $logFile "Username OK"
+        }
+
+        #User profile name set after SAM
+        $UPN = $SAM + "@star.dcu" #user profile name
+        
 
         #Parameters for new user command
         $newUserParams = @{
@@ -48,9 +71,6 @@ ForEach($user in $users){
             ErrorAction = "Stop"
         }
 
-        #Comment log file
-        Add-Content $logFile "Adding $fullName $(Get-Date)" 
-
         #Create a new user with the specified parameters
         New-ADUser @newUserParams
 
@@ -67,23 +87,25 @@ ForEach($user in $users){
             }
             Catch {
                 Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
-            }
-        
-        #Confirms group addition in log file
-        Add-Content $logFile "$fullName added to specified groups"    
+            }    
         }
+        #Confirms group addition in log file
+        Add-Content $logFile "$fullName added to specified groups"
     }
+
     #Catch unauthorized error
-    catch [System.UnauthorizedAccessException]{
+    Catch [System.UnauthorizedAccessException]{
         Write-Output "You must be a domain administrator to run this script."
         Break #Break to prevent looping with an error for each user
     }
+
     #Catch user already exists error and add to log file
-    catch [System.ServiceModel.FaultException]{
-        Write-Output "user $fullName already exists." | Add-Content $logFile -PassThru
+    Catch [System.ServiceModel.FaultException]{
+        Write-Output "User $fullName already exists." | Add-Content $logFile -PassThru
     }
+
     #Catch all other errors and add to log file
-    catch {
+    Catch {
         Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
     }
 }
