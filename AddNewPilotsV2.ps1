@@ -13,19 +13,22 @@ $password = "Password1"
 #Set location for CSV file
 $users = Import-Csv -Path "C:\PowerShell\AddNewPilots\NewPilots.csv"
 
+#region User Creation
+
 #Loop that creates each user in the CSV
 ForEach($user in $users){
     Try{
-        #Variables for each user
+        #region User Variables
         $fullName = $user.Last + ", " + $user.First #user's full name
         $templateUser = Get-ADUser -Identity $user.Template -Properties Manager, Department, Title, Company #Template account to use for new user
         $templateGroups = (Get-ADUser -Identity $user.Template -Properties MemberOf).MemberOf #Template groups to use for new user
         $SAM = $user.First.Substring(0,1) + $user.Last #samAccount name
+        #endregion
 
         #Comment log file
         Add-Content $logFile "Adding $fullName $(Get-Date)" 
 
-        #Test for samAccount Name
+        #region Test for samAccount Name
         if (Get-ADUser -Filter "SamAccountName -eq '$SAM'") {
             #Use middle initial
             $SAM = $user.First.Substring(0,1) + $user.Initials.Substring(1,1) + $user.Last
@@ -41,12 +44,13 @@ ForEach($user in $users){
             #Use first inital last name
             Add-Content $logFile "Username OK"
         }
+        #endregion
 
         #User profile name set after SAM
         $UPN = $SAM + "@star.dcu" #user profile name
         
 
-        #Parameters for new user command
+        #region New-ADUser Parameters
         $newUserParams = @{
             Name = $fullName
             Instance = $templateUser
@@ -70,6 +74,7 @@ ForEach($user in $users){
             Enabled = $true
             ErrorAction = "Stop"
         }
+        #endregion
 
         #Create a new user with the specified parameters
         New-ADUser @newUserParams
@@ -80,7 +85,7 @@ ForEach($user in $users){
         #Pause to be sure user is created
         Start-Sleep -Milliseconds 550
         
-        #Loop to add groups to user
+        #region Add Group Membership
         ForEach($group in $templateGroups){
             Try {
                 Add-ADGroupMember $group -Members $SAM
@@ -91,7 +96,9 @@ ForEach($user in $users){
         }
         #Confirms group addition in log file
         Add-Content $logFile "$fullName added to specified groups"
+        #endregion
     }
+    #region Error Catching
 
     #Catch unauthorized error
     Catch [System.UnauthorizedAccessException]{
@@ -108,4 +115,6 @@ ForEach($user in $users){
     Catch {
         Add-Content $logFile "Error for $fullName - $($_.Exception.Message)" -PassThru
     }
+    #endregion
 }
+#endregion 
