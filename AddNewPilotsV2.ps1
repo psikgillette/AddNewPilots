@@ -91,6 +91,15 @@ ForEach($user in $users){
         }
         #Confirms group addition in log file
         Add-Content $logFile "$fullName added to specified groups"
+
+        #Add mailbox to user
+        Try {
+            Enable-Mailbox -Identity Star\$SAM -Alias $SAM -Database Pilots
+            Add-Content $logFile "$fullName mailbox created"
+        }
+        Catch {
+            Add-Content $logFile "Error creating mailbox for $fullName - $($_.Exception.Message)" -PassThru
+        }
     }
 
     #Catch unauthorized error
